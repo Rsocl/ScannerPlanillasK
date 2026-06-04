@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilla Scanner Pro - Búsqueda OCR en PDF</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/themify-icons@0.1.2/css/themify-icons.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-decoration: none;
+            border: none;
+            outline: none;
+            scroll-behavior: smooth;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --bg-color: #1e1a2f;        /* Morado oscuro elegante */
+            --second-bg-color: #2a2438;  /* Morado suave */
+            --text-color: #f5eef7;
+            --main-color: #ff9eb5;       /* Rosa pastel principal */
+            --main-glow: #ffb7c8;
+            --accent-color: #d9b4ff;     /* Lavanda */
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+        }
+
+        html {
+            font-size: 62.5%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: 2rem;
+        }
+
+        body.auth-locked {
+            overflow: hidden;
+        }
+
+        body.auth-locked .ps-wrap {
+            filter: blur(10px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        section {
+            min-height: 100vh;
+            padding: 9rem 9% 2rem;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem 9%;
+            background: rgba(30, 26, 47, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-bottom: 0.1rem solid rgba(255, 158, 181, 0.2);
+        }
+
+        .header.sticky {
+            border-bottom: .1rem solid rgba(0, 0, 0, .2);
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            color: var(--text-color);
+            font-weight: 600;
+            cursor: default;
+        }
+
+        .logo span {
+            color: var(--main-color);
+            text-shadow: 0 0 8px rgba(255, 158, 181, 0.5);
+        }
+
+        .navbar a {
+            font-size: 1.7rem;
+            color: var(--text-color);
+            margin-left: 4rem;
+            transition: 0.3s;
+        }
+
+        .navbar a:hover {
+            color: var(--main-color);
+            text-shadow: 0 0 5px rgba(255, 158, 181, 0.5);
+        }
+
+        .navbar i {
+            font-size: 3rem;
+        }
+
+        #menu-icon {
+            font-size: 3.6rem;
+            color: var(--text-color);
+            display: none;
+        }
+
+        /* Botones */
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.8rem;
+            background: var(--main-color);
+            border-radius: 4rem;
+            box-shadow: 0 0 1rem var(--main-color);
+            font-size: 1.6rem;
+            color: #2a2438;
+            letter-spacing: .1rem;
+            font-weight: 600;
+            transition: .3s ease;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 2rem var(--main-glow);
+            background: #ffb0c2;
+            transform: scale(1.02);
+        }
+
+        .btn-sec {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: transparent;
+            border: 0.2rem solid var(--main-color);
+            border-radius: 4rem;
+            font-size: 1.4rem;
+            color: var(--main-color);
+            letter-spacing: .1rem;
+            font-weight: 500;
+            transition: .3s ease;
+            cursor: pointer;
+        }
+
+        .btn-sec:hover {
+            background: var(--main-color);
+            color: #2a2438;
+            box-shadow: 0 0 1rem var(--main-color);
+        }
+
+        /* Contenedor principal */
+        .ps-wrap {
+            max-width: 1400px;
+            margin: 8rem auto 0;
+        }
+
+        /* Paneles */
+        .ps-panel {
+            background: rgba(42, 36, 56, 0.8);
+            backdrop-filter: blur(4px);
+            border: 0.1rem solid rgba(255, 158, 181, 0.3);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+        }
+
+        .ps-section-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--main-color);
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .ps-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ps-field label {
+            font-size: 1.4rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .ps-field input[type="text"] {
+            font-size: 1.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-color);
+            border: 0.1rem solid rgba(255, 158, 181, 0.3);
+            border-radius: 0.8rem;
+            color: var(--text-color);
+            font-family: inherit;
+            transition: 0.3s;
+        }
+
+        .ps-field input[type="text"]:focus {
+            border-color: var(--main-color);
+            box-shadow: 0 0 0.8rem var(--main-color);
+        }
+
+        .ps-field input[type="file"] {
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 1rem 0;
+            color: var(--text-color);
+        }
+
+        .ps-field input[type="file"]::file-selector-button {
+            padding: 0.8rem 1.5rem;
+            background: var(--main-color);
+            border: none;
+            border-radius: 0.8rem;
+            color: #2a2438;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 1rem;
+            transition: 0.3s;
+        }
+
+        .ps-field input[type="file"]::file-selector-button:hover {
+            box-shadow: 0 0 0.8rem var(--main-color);
+            background: #ffb0c2;
+        }
+
+        .ps-row {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .ps-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.3rem;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .ps-toggle input {
+            width: 1.6rem;
+            height: 1.6rem;
+            cursor: pointer;
+            accent-color: var(--main-color);
+        }
+
+        /* Progreso */
+        .ps-progress-wrap {
+            background: var(--second-bg-color);
+            border: 0.1rem solid rgba(255, 158, 181, 0.3);
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .ps-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .ps-progress-label {
+            font-size: 1.3rem;
+            color: var(--text-color);
+        }
+
+        .ps-progress-pct {
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-family: monospace;
+            color: var(--main-color);
+        }
+
+        .ps-track {
+            height: 0.4rem;
+            background: var(--bg-color);
+            border-radius: 0.4rem;
+            overflow: hidden;
+        }
+
+        .ps-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--main-color), var(--accent-color));
+            border-radius: 0.4rem;
+            transition: width 0.25s;
+            box-shadow: 0 0 0.5rem var(--main-color);
+        }
+
+        /* Cola de procesamiento */
+        .ps-queue {
+            display: none;
+            margin-bottom: 2rem;
+        }
+
+        .ps-queue-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ps-q-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--second-bg-color);
+            border: 0.1rem solid rgba(255, 158, 181, 0.2);
+            border-radius: var(--border-radius-md);
+            font-size: 1.3rem;
+        }
+
+        .ps-q-dot {
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .ps-q-dot.pending {
+            background: #9b8caf;
+        }
+
+        .ps-q-dot.processing {
+            background: var(--main-color);
+            box-shadow: 0 0 0.5rem var(--main-color);
+        }
+
+        .ps-q-dot.done {
+            background: #c084fc;
+        }
+
+        .ps-q-dot.error {
+            background: #ff7b7b;
+        }
+
+        .ps-q-name {
+            color: var(--text-color);
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .ps-q-status {
+            font-size: 1.1rem;
+            color: #c4b5d0;
+        }
+
+        .ps-q-status.done {
+            color: #c084fc;
+        }
+
+        .ps-q-status.processing {
+            color: var(--main-color);
+        }
+
+        /* Estadísticas */
+        .ps-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .ps-stat {
+            background: var(--second-bg-color);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            border: 0.1rem solid rgba(255, 158, 181, 0.3);
+            transition: 0.3s;
+        }
+
+        .ps-stat:hover {
+            transform: translateY(-0.5rem);
+            border-color: var(--main-color);
+            box-shadow: 0 0.5rem 1rem rgba(255, 158, 181, 0.2);
+        }
+
+        .ps-stat-n {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--main-color);
+            line-height: 1;
+        }
+
+        .ps-stat-l {
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-color);
+            margin-top: 0.5rem;
+        }
+
+        /* Tabla de resultados */
+        .ps-table-wrap {
+            overflow-x: auto;
+            border-radius: var(--border-radius-md);
+            border: 0.1rem solid rgba(255, 158, 181, 0.3);
+        }
+
+        .ps-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1.2rem;
+        }
+
+        .ps-table th {
+            background: #1e1a2f;
+            color: var(--main-color);
+            padding: 1.2rem 1rem;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .ps-table th.center {
+            text-align: center;
+        }
+
+        .ps-table td {
+            padding: 1rem 1rem;
+            border-bottom: 0.1rem solid rgba(255, 158, 181, 0.1);
+            vertical-align: middle;
+            color: var(--text-color);
+        }
+
+        .ps-table tr:hover td {
+            background: rgba(217, 180, 255, 0.08);
+        }
+
+        .ps-pill-yes {
+            background: rgba(192, 132, 252, 0.2);
+            color: #c084fc;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ps-pill-no {
+            background: rgba(255, 123, 123, 0.2);
+            color: #ff9b9b;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ps-page-cell {
+            width: 2.8rem;
+            height: 2.4rem;
+            border-radius: 0.6rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: default;
+            font-family: monospace;
+        }
+
+        .ps-page-cell.hit {
+            background: rgba(255, 158, 181, 0.2);
+            color: var(--main-color);
+            border: 0.1rem solid var(--main-color);
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .ps-page-cell.hit:hover {
+            transform: translateY(-0.1rem) scale(1.03);
+            box-shadow: 0 0 0.8rem rgba(255, 158, 181, 0.4);
+            background: rgba(255, 158, 181, 0.3);
+        }
+
+        .ps-page-cell.miss {
+            background: var(--bg-color);
+            color: transparent;
+        }
+
+        .ps-result-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: center;
+        }
+
+        .ps-mini-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.55rem 1rem;
+            border-radius: 999px;
+            border: 0.1rem solid rgba(255, 158, 181, 0.4);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--main-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+        .ps-mini-btn:hover {
+            background: var(--main-color);
+            color: #2a2438;
+            box-shadow: 0 0 0.8rem rgba(255, 158, 181, 0.4);
+        }
+
+        .ps-mini-btn.secondary {
+            border-color: rgba(255, 255, 255, 0.18);
+            color: var(--text-color);
+        }
+
+        .ps-mini-btn.secondary:hover {
+            background: rgba(255, 158, 181, 0.2);
+            color: var(--main-color);
+            box-shadow: none;
+        }
+
+        .ps-error {
+            background: rgba(255, 123, 123, 0.15);
+            border: 0.1rem solid #ff7b7b;
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .ps-error p {
+            margin: 0;
+            font-size: 1.4rem;
+            color: #ff9b9b;
+        }
+
+        .ps-preview-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 22, 40, 0.92);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            z-index: 1000;
+        }
+
+        .ps-preview-modal.open {
+            display: flex;
+        }
+
+        .ps-preview-card {
+            width: min(1200px, 100%);
+            height: min(92vh, 920px);
+            background: var(--second-bg-color);
+            border: 0.1rem solid rgba(255, 158, 181, 0.4);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ps-preview-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 0.1rem solid rgba(255, 158, 181, 0.2);
+            background: rgba(30, 26, 47, 0.9);
+        }
+
+        .ps-preview-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--main-color);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ps-preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #fff;
+        }
+
+        .ps-divider {
+            height: 0.1rem;
+            background: linear-gradient(90deg, transparent, var(--main-color), transparent);
+            margin: 1.5rem 0;
+        }
+
+        /* Footer */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 2rem 9%;
+            background: rgba(42, 36, 56, 0.8);
+            backdrop-filter: blur(4px);
+            margin-top: 3rem;
+            border-radius: 1rem;
+            border: 0.1rem solid rgba(255, 158, 181, 0.2);
+        }
+
+        .footer-text p {
+            font-size: 1.4rem;
+            color: var(--text-color);
+        }
+
+        .footer-iconTop a {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.8rem;
+            background: var(--main-color);
+            border-radius: 0.8rem;
+            transition: 0.5s ease;
+        }
+
+        .footer-iconTop a:hover {
+            box-shadow: 0 0 1rem var(--main-color);
+            transform: translateY(-3px);
+        }
+
+        .footer-iconTop a i {
+            font-size: 2rem;
+            color: #2a2438;
+        }
+
+        /* Login - Estilo femenino */
+        .auth-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background:
+                radial-gradient(circle at top left, rgba(255, 158, 181, 0.15), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(217, 180, 255, 0.12), transparent 40%),
+                rgba(26, 22, 40, 0.95);
+            backdrop-filter: blur(12px);
+        }
+
+        .auth-overlay.open {
+            display: flex;
+        }
+
+        .auth-card {
+            width: min(940px, 100%);
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            overflow: hidden;
+            border-radius: 2rem;
+            background: rgba(42, 36, 56, 0.92);
+            border: 0.1rem solid rgba(255, 158, 181, 0.35);
+            box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.4);
+        }
+
+        .auth-brand {
+            padding: 3rem;
+            background:
+                linear-gradient(135deg, rgba(255, 158, 181, 0.12), rgba(30, 26, 47, 0.06)),
+                radial-gradient(circle at top right, rgba(255, 158, 181, 0.15), transparent 40%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .auth-brand-badge {
+            width: 8rem;
+            height: 8rem;
+            border-radius: 2rem;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 158, 181, 0.15);
+            border: 0.1rem solid rgba(255, 158, 181, 0.4);
+            box-shadow: 0 0 2rem rgba(255, 158, 181, 0.2);
+            color: var(--main-color);
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            overflow: hidden;
+        }
+
+        .auth-brand-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .auth-brand-kicker {
+            font-size: 1.2rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--main-color);
+            font-weight: 700;
+        }
+
+        .auth-brand h1 {
+            font-size: clamp(3rem, 4vw, 5.2rem);
+            line-height: 1;
+            margin-top: 0.6rem;
+            color: var(--text-color);
+        }
+
+        .auth-brand p {
+            font-size: 1.5rem;
+            line-height: 1.7;
+            color: rgba(245, 238, 247, 0.85);
+            max-width: 42rem;
+        }
+
+        .auth-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .auth-metric {
+            border-radius: 1.4rem;
+            border: 0.1rem solid rgba(255, 158, 181, 0.2);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.2rem;
+        }
+
+        .auth-metric strong {
+            display: block;
+            font-size: 1.8rem;
+            color: var(--main-color);
+            margin-bottom: 0.4rem;
+        }
+
+        .auth-metric span {
+            font-size: 1.2rem;
+            color: rgba(245, 238, 247, 0.8);
+        }
+
+        .auth-form {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1.4rem;
+            background: rgba(30, 26, 47, 0.85);
+        }
+
+        .auth-title {
+            font-size: 2.4rem;
+            color: var(--text-color);
+            font-weight: 700;
+        }
+
+        .auth-subtitle {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            color: rgba(245, 238, 247, 0.75);
+            margin-bottom: 0.8rem;
+        }
+
+        .auth-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .auth-field label {
+            font-size: 1.3rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 1.2rem 1.4rem;
+            border-radius: 1rem;
+            background: var(--bg-color);
+            border: 0.1rem solid rgba(255, 158, 181, 0.3);
+            color: var(--text-color);
+            font-size: 1.5rem;
+            transition: 0.25s ease;
+        }
+
+        .auth-input:focus {
+            border-color: var(--main-color);
+            box-shadow: 0 0 0.8rem rgba(255, 158, 181, 0.25);
+        }
+
+        .auth-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .auth-check {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.3rem;
+            color: rgba(245, 238, 247, 0.85);
+        }
+
+        .auth-check input {
+            accent-color: var(--main-color);
+            width: 1.6rem;
+            height: 1.6rem;
+        }
+
+        .auth-error {
+            min-height: 2rem;
+            font-size: 1.2rem;
+            color: #ff9b9b;
+        }
+
+        .auth-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 0.6rem;
+        }
+
+        .auth-actions .btn,
+        .auth-actions .btn-sec {
+            min-width: 16rem;
+            justify-content: center;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .auth-card {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-brand {
+                padding-bottom: 1.5rem;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .ps-wrap {
+                margin-top: 6rem;
+            }
+            
+            .ps-stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .ps-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn, .btn-sec {
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-overlay open" id="authOverlay" aria-hidden="false">
+    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+        <div class="auth-brand">
+            <div>
+                <div class="auth-brand-badge" id="authBrandBadge">
+                    <span id="authBrandBadgeText">TE</span>
+                    <img id="authBrandLogo" alt="Logo de la empresa" />
+                </div>
+                <div style="margin-top: 2rem;">
+                    <div class="auth-brand-kicker">Acceso privado</div>
+                    <h1 id="authBrandName">Tz'unun Code</h1>
+                    <p id="authBrandText">
+                        Ingresa con tus credenciales para acceder al escáner, revisar documentos y abrir la vista previa de los resultados.
+                    </p>
+                </div>
+            </div>
+            <div class="auth-metrics">
+                <div class="auth-metric">
+                    <strong>Seguridad</strong>
+                    <span>Acceso local con sesión temporal en esta pestaña.</span>
+                </div>
+                <div class="auth-metric">
+                    <strong>Branding</strong>
+                    <span>Desarrollada para mejora y optimización.</span>
+                </div>
+            </div>
+        </div>
+
+        <form class="auth-form" id="authForm" autocomplete="on">
+            <div>
+                <div class="auth-title" id="authTitle">Iniciar sesión</div>
+                <div class="auth-subtitle">
+                    Esta validación es previa al programa y desaparece después de confirmar la identidad.
+                </div>
+            </div>
+
+            <div class="auth-field">
+                <label for="authUser">Usuario</label>
+                <input class="auth-input" type="text" id="authUser" autocomplete="username" placeholder="Usuario de acceso" />
+            </div>
+
+            <div class="auth-field">
+                <label for="authPass">Contraseña</label>
+                <input class="auth-input" type="password" id="authPass" autocomplete="current-password" placeholder="Contraseña" />
+            </div>
+
+            <div class="auth-row">
+                <label class="auth-check">
+                    <input type="checkbox" id="authRemember" checked />
+                    Mantener sesión durante esta pestaña
+                </label>
+            </div>
+
+            <div class="auth-error" id="authError"></div>
+
+            <div class="auth-actions">
+                <button class="btn" type="submit">
+                    <i class='bx bx-lock-open-alt'></i> Entrar
+                </button>
+                <button class="btn-sec" type="button" id="authResetBtn">
+                    <i class='bx bx-refresh'></i> Limpiar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="ps-wrap">
+    <!-- Header -->
+    <div class="header">
+        <a href="#" class="logo">Scanner <span>Planillas Pro</span></a>
+        <div class="navbar">
+            <a href="#">Inicio</a>
+            <a href="#queueArea">Escáner</a>
+            <a href="#resultsArea">Resultados</a>
+
+        </div>
+        <div id="menu-icon"><i class='bx bx-menu'></i></div>
+    </div>
+
+    <div class="ps-panel">
+        <p class="ps-section-label"><i class='bx bx-search-alt'></i> Configuración de búsqueda</p>
+        <div class="ps-field">
+            <label><i class='bx bx-folder-open'></i> Planillas PDF</label>
+            <input type="file" id="pdfInput" accept=".pdf" multiple />
+        </div>
+        <div class="ps-field">
+            <label><i class='bx bx-user'></i> Nombre o frase a buscar</label>
+            <input type="text" id="searchTerm" placeholder="Ej: JUAN PÉREZ, MARÍA" />
+        </div>
+        <div class="ps-divider"></div>
+        <div class="ps-row">
+            <label class="ps-toggle">
+                <input type="checkbox" id="caseSensitive" />
+                Distinguir mayúsculas/minúsculas
+            </label>
+            <label class="ps-toggle">
+                <input type="checkbox" id="useOCR" checked />
+                Usar OCR (recomendado para PDF escaneados)
+            </label>
+            <span style="flex:1"></span>
+            <button class="btn" id="searchBtn">
+                <i class='bx bx-search'></i> Iniciar escaneo
+            </button>
+        </div>
+    </div>
+
+    <div class="ps-queue" id="queueArea">
+        <p class="ps-section-label"><i class='bx bx-list-ul'></i> Cola de procesamiento</p>
+        <div class="ps-queue-grid" id="queueList"></div>
+    </div>
+
+    <div class="ps-progress-wrap" id="globalProgress">
+        <div class="ps-progress-header">
+            <span class="ps-progress-label" id="globalStatusText">Iniciando…</span>
+            <span class="ps-progress-pct" id="globalPct">0%</span>
+        </div>
+        <div class="ps-track"><div class="ps-fill" id="globalFill"></div></div>
+    </div>
+
+    <div id="resultsArea" style="display:none;">
+        <div class="ps-stat-grid" id="summaryCards"></div>
+        <div class="ps-panel" style="padding: 0;">
+            <div style="padding: 1.5rem 2rem; display:flex; align-items:center; justify-content:space-between; border-bottom: 0.1rem solid rgba(255, 158, 181, 0.2); flex-wrap:wrap; gap:1rem;">
+                <span style="font-size:1.3rem; font-weight:500; color: var(--main-color);">
+                    <i class='bx bx-grid-alt'></i> Resultados por planilla
+                </span>
+                <div style="display:flex; gap:1rem;">
+                    <button class="btn-sec" id="exportBtn">
+                        <i class='bx bx-download'></i> Exportar CSV
+                    </button>
+                </div>
+            </div>
+            <div class="ps-table-wrap" style="border:none; border-radius:0 0 var(--border-radius-lg) var(--border-radius-lg);">
+                <table class="ps-table">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="ps-error" id="errorArea">
+        <p id="errorMsg"></p>
+    </div>
+
+    <div class="ps-preview-modal" id="previewModal" aria-hidden="true">
+        <div class="ps-preview-card" role="dialog" aria-modal="true" aria-label="Vista previa de PDF">
+            <div class="ps-preview-head">
+                <div class="ps-preview-title" id="previewTitle">Vista previa</div>
+                <button class="ps-mini-btn secondary" type="button" id="closePreviewBtn">
+                    <i class='bx bx-x'></i> Cerrar
+                </button>
+            </div>
+            <iframe class="ps-preview-iframe" id="previewFrame" title="Vista previa del PDF"></iframe>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-text">
+            <p>Copyright &copy; 2026 | Tz'unun Code - Ronys - Búsqueda OCR en PDF</p>
+        </div>
+        <div class="footer-iconTop">
+            <a href="#"><i class='bx bx-up-arrow-alt'></i></a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+<script>
+// Inicialización correcta de PDF.js
+let pdfjsLib = window.pdfjsLib || window['pdfjs-dist/build/pdf'];
+if (!pdfjsLib) {
+    console.error('PDF.js no cargado correctamente');
+    showError('Error: No se pudo cargar PDF.js. Recarga la página.');
+}
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const LOGIN_CONFIG = {
+    username: 'Karencita',
+    password: 'Karen2026',
+    companyName: 'Tz\'unun Code',
+    brandText: 'TE',
+    logoUrl: 'logo.png', // Deja en blanco para usar solo texto
+    sessionKey: 'planilla_scanner_auth_ok_v1'
+};
+
+// Variables globales
+let searching = false;
+let allResults = [];
+let searchedTerm = '';
+let activePreviewUrls = [];
+let authUnlocked = false;
+
+const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+// Menu responsive
+document.getElementById('menu-icon')?.addEventListener('click', () => {
+    document.querySelector('.navbar').classList.toggle('active');
+});
+
+function syncLoginBranding() {
+    const brandName = document.getElementById('authBrandName');
+    const brandText = document.getElementById('authBrandText');
+    const badgeText = document.getElementById('authBrandBadgeText');
+    const logo = document.getElementById('authBrandLogo');
+
+    if (brandName) brandName.textContent = LOGIN_CONFIG.companyName;
+    if (brandText) brandText.textContent = 'Ingresa con tus credenciales para acceder al escáner, revisar documentos y abrir la vista previa de los resultados.';
+    if (badgeText) badgeText.textContent = LOGIN_CONFIG.brandText;
+
+    if (logo) {
+        if (LOGIN_CONFIG.logoUrl) {
+            logo.src = LOGIN_CONFIG.logoUrl;
+            logo.style.display = 'block';
+            badgeText.style.display = 'none';
+        } else {
+            logo.removeAttribute('src');
+            logo.style.display = 'none';
+            badgeText.style.display = 'block';
+        }
+    }
+}
+
+function showLogin() {
+    const overlay = document.getElementById('authOverlay');
+    const error = document.getElementById('authError');
+    if (!overlay) return;
+
+    document.body.classList.add('auth-locked');
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    if (error) error.textContent = '';
+
+    const user = document.getElementById('authUser');
+    const pass = document.getElementById('authPass');
+    if (user && !user.value) user.focus();
+    else if (pass) pass.focus();
+}
+
+function hideLogin() {
+    const overlay = document.getElementById('authOverlay');
+    if (!overlay) return;
+
+    document.body.classList.remove('auth-locked');
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    authUnlocked = true;
+}
+
+function isAuthenticated() {
+    return sessionStorage.getItem(LOGIN_CONFIG.sessionKey) === '1';
+}
+
+function persistAuth(enabled) {
+    if (enabled) {
+        sessionStorage.setItem(LOGIN_CONFIG.sessionKey, '1');
+    } else {
+        sessionStorage.removeItem(LOGIN_CONFIG.sessionKey);
+    }
+}
+
+function validateAuth(username, password) {
+    return username === LOGIN_CONFIG.username && password === LOGIN_CONFIG.password;
+}
+
+function submitAuth(event) {
+    event.preventDefault();
+
+    const user = document.getElementById('authUser');
+    const pass = document.getElementById('authPass');
+    const remember = document.getElementById('authRemember');
+    const error = document.getElementById('authError');
+
+    const username = user?.value.trim() || '';
+    const password = pass?.value || '';
+
+    if (!username || !password) {
+        if (error) error.textContent = 'Ingresa usuario y contraseña.';
+        return;
+    }
+
+    if (!validateAuth(username, password)) {
+        if (error) error.textContent = 'Credenciales incorrectas.';
+        if (pass) pass.value = '';
+        pass?.focus();
+        return;
+    }
+
+    persistAuth(!!remember?.checked);
+    if (error) error.textContent = '';
+    hideLogin();
+}
+
+function resetAuthForm() {
+    const user = document.getElementById('authUser');
+    const pass = document.getElementById('authPass');
+    const error = document.getElementById('authError');
+    if (user) user.value = '';
+    if (pass) pass.value = '';
+    if (error) error.textContent = '';
+    user?.focus();
+}
+
+document.getElementById('authForm')?.addEventListener('submit', submitAuth);
+document.getElementById('authResetBtn')?.addEventListener('click', resetAuthForm);
+document.getElementById('authPass')?.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById('authForm')?.requestSubmit();
+    }
+});
+
+document.getElementById('closePreviewBtn')?.addEventListener('click', closePdfPreview);
+document.getElementById('previewModal')?.addEventListener('click', event => {
+    if (event.target && event.target.id === 'previewModal') {
+        closePdfPreview();
+    }
+});
+
+window.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+        closePdfPreview();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    syncLoginBranding();
+
+    if (isAuthenticated()) {
+        hideLogin();
+    } else {
+        showLogin();
+    }
+});
+
+function getFileLabel(name) {
+    const clean = name.replace(/\.pdf$/i, '');
+    for (let i = 0; i < MONTHS.length; i++) {
+        if (clean.toLowerCase().includes(MONTHS[i].toLowerCase())) {
+            return MONTHS[i];
+        }
+    }
+    return clean.length > 20 ? clean.substring(0, 18) + '…' : clean;
+}
+
+function registerPreviewUrl(url) {
+    activePreviewUrls.push(url);
+    return url;
+}
+
+function cleanupPreviewUrls() {
+    activePreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    activePreviewUrls = [];
+}
+
+function closePdfPreview() {
+    const modal = document.getElementById('previewModal');
+    const iframe = document.getElementById('previewFrame');
+
+    if (iframe) iframe.src = 'about:blank';
+    if (modal) modal.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function openPdfPreview(resultIndex, pageNumber) {
+    const result = allResults[resultIndex];
+    if (!result || !result.sourceUrl) {
+        showError('No hay documento disponible para previsualizar.');
+        return;
+    }
+
+    const modal = document.getElementById('previewModal');
+    const iframe = document.getElementById('previewFrame');
+    const title = document.getElementById('previewTitle');
+    const resolvedPage = Math.max(1, Number(pageNumber) || result.firstPage || 1);
+
+    if (!modal || !iframe || !title) return;
+
+    title.textContent = `${result.label} · página ${resolvedPage}`;
+    iframe.src = `${result.sourceUrl}#page=${resolvedPage}`;
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function normalizeText(text) {
+    if (!text) return '';
+    return text
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^\w\s]/g, ' ');
+}
+
+function searchTermInText(text, term, caseSensitive) {
+    if (!text || !term) return 0;
+    
+    let searchText = text;
+    let searchTerm = term;
+    
+    if (!caseSensitive) {
+        searchText = searchText.toLowerCase();
+        searchTerm = searchTerm.toLowerCase();
+    }
+    
+    const regex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const exactMatches = (searchText.match(regex) || []).length;
+    
+    if (exactMatches > 0) return exactMatches;
+    
+    const normalizedText = normalizeText(text);
+    const normalizedTerm = normalizeText(term);
+    const normalizedMatches = (normalizedText.match(new RegExp(normalizedTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+    
+    return normalizedMatches;
+}
+
+async function processPDF(file, label, term, caseSensitive, useOCR, fileIdx, totalFiles) {
+    const sourceUrl = registerPreviewUrl(URL.createObjectURL(file));
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+    const totalPages = pdf.numPages;
+    const foundPages = [];
+    
+    console.log(`🔍 Buscando: "${term}" en ${label}`);
+    
+    let ocrWorker = null;
+    if (useOCR) {
+        try {
+            ocrWorker = await Tesseract.createWorker('spa');
+            console.log('✅ Worker OCR inicializado');
+        } catch(e) {
+            console.warn('⚠️ OCR no disponible:', e.message);
+        }
+    }
+    
+    for (let p = 1; p <= totalPages; p++) {
+        const pct = Math.round(((fileIdx * totalPages + p) / (totalFiles * totalPages)) * 100);
+        updateGlobal(`${label} — página ${p}/${totalPages}`, pct);
+        
+        const page = await pdf.getPage(p);
+        let pageText = '';
+        let totalMatches = 0;
+        
+        // Texto nativo
+        try {
+            const textContent = await page.getTextContent();
+            pageText = textContent.items
+                .map(item => item.str)
+                .filter(s => s && s.trim().length > 0)
+                .join(' ')
+                .trim();
+            
+            if (pageText && pageText.length > 5) {
+                totalMatches = searchTermInText(pageText, term, caseSensitive);
+                if (totalMatches > 0) {
+                    console.log(`✅ Página ${p} - Encontrado en texto nativo`);
+                }
+            }
+        } catch(e) {
+            console.log(`Sin texto nativo pág ${p}`);
+        }
+        
+        // OCR si no hay texto y está activado
+        if (totalMatches === 0 && useOCR && ocrWorker) {
+            try {
+                console.log(`📷 OCR página ${p}...`);
+                const viewport = page.getViewport({ scale: 2.5 });
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                const context = canvas.getContext('2d');
+                
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                
+                const { data: { text } } = await ocrWorker.recognize(canvas);
+                const ocrText = text.trim();
+                
+                if (ocrText && ocrText.length > 10) {
+                    totalMatches = searchTermInText(ocrText, term, caseSensitive);
+                    if (totalMatches > 0) {
+                        console.log(`✅ Página ${p} - Encontrado vía OCR`);
+                    }
+                }
+            } catch(ocrError) {
+                console.log(`❌ Error OCR página ${p}:`, ocrError.message);
+            }
+        }
+        
+        if (totalMatches > 0) {
+            foundPages.push({ page: p, count: totalMatches });
+        }
+    }
+    
+    if (ocrWorker) {
+        await ocrWorker.terminate();
+    }
+    
+    console.log(`📊 ${label}: ${foundPages.length} páginas encontradas`);
+    
+    return {
+        label,
+        filename: file.name,
+        found: foundPages.length > 0,
+        pages: foundPages,
+        totalPages,
+        searchTerm: term,
+        sourceUrl,
+        firstPage: foundPages[0]?.page || 1
+    };
+}
+
+function renderQueue(fileStates) {
+    const queueList = document.getElementById('queueList');
+    if (!queueList) return;
+    
+    queueList.innerHTML = fileStates.map(fs => `
+        <div class="ps-q-item">
+            <div class="ps-q-dot ${fs.status}"></div>
+            <span class="ps-q-name">${fs.label}</span>
+            <span class="ps-q-status ${fs.status}">${
+                fs.status === 'pending' ? '⏳ en espera' :
+                fs.status === 'processing' ? '🔄 procesando...' :
+                fs.status === 'done' ? '✅ completado' : '❌ error'
+            }</span>
+        </div>
+    `).join('');
+}
+
+function updateGlobal(msg, pct) {
+    const statusText = document.getElementById('globalStatusText');
+    const fill = document.getElementById('globalFill');
+    const pctText = document.getElementById('globalPct');
+    
+    if (statusText) statusText.textContent = msg;
+    if (fill) fill.style.width = pct + '%';
+    if (pctText) pctText.textContent = pct + '%';
+}
+
+function showResults(term, results) {
+    const resultsArea = document.getElementById('resultsArea');
+    if (!resultsArea) return;
+    
+    resultsArea.style.display = 'block';
+    
+    const found = results.filter(r => r.found).length;
+    const notFound = results.length - found;
+    const totalHits = results.reduce((s, r) => s + r.pages.reduce((a, p) => a + p.count, 0), 0);
+    
+    const summaryCards = document.getElementById('summaryCards');
+    if (summaryCards) {
+        summaryCards.innerHTML = `
+            <div class="ps-stat">
+                <div class="ps-stat-n">${results.length}</div>
+                <div class="ps-stat-l">📄 Planillas</div>
+            </div>
+            <div class="ps-stat">
+                <div class="ps-stat-n">${found}</div>
+                <div class="ps-stat-l">✅ Con nombre</div>
+            </div>
+            <div class="ps-stat">
+                <div class="ps-stat-n">${notFound}</div>
+                <div class="ps-stat-l">❌ Sin nombre</div>
+            </div>
+            <div class="ps-stat">
+                <div class="ps-stat-n">${totalHits}</div>
+                <div class="ps-stat-l">🎯 Ocurrencias</div>
+            </div>
+        `;
+    }
+    
+    const maxPages = Math.max(...results.map(r => r.totalPages), 1);
+    
+    const tableHead = document.getElementById('tableHead');
+    if (tableHead) {
+        tableHead.innerHTML = `<tr>
+            <th style="min-width:120px;">📑 Planilla</th>
+            <th class="center" style="min-width:90px;">📌 Resultado</th>
+            <th class="center" style="min-width:70px;">📊 Páginas</th>
+            <th colspan="${maxPages}" style="min-width:${maxPages * 32}px;">🗺️ Mapa de páginas</th>
+        </tr>`;
+    }
+    
+    const tableBody = document.getElementById('tableBody');
+    if (tableBody) {
+        tableBody.innerHTML = results.map((r, index) => {
+            const foundSet = new Set(r.pages.map(p => p.page));
+            const countMap = {};
+            r.pages.forEach(p => { countMap[p.page] = p.count; });
+            const firstPage = r.pages[0]?.page || 1;
+            
+            let cells = '';
+            for (let p = 1; p <= maxPages; p++) {
+                if (p > r.totalPages) {
+                    cells += `<td style="text-align:center;">—</td>`;
+                } else if (foundSet.has(p)) {
+                    cells += `<td style="text-align:center;padding:6px 2px;">
+                        <span class="ps-page-cell hit" role="button" tabindex="0" data-preview-index="${index}" data-preview-page="${p}" title="Página ${p}: ${countMap[p]} ocurrencia(s)">${p}</span>
+                    </td>`;
+                } else {
+                    cells += `<td style="text-align:center;padding:6px 2px;">
+                        <span class="ps-page-cell miss" title="Sin coincidencias">·</span>
+                    </td>`;
+                }
+            }
+            
+            const badge = r.error
+                ? `<span style="font-size:1.1rem;color:#dc3545;">❌ error</span>`
+                : r.found
+                    ? `<span class="ps-pill-yes"><i class='bx bx-check-circle'></i> sí (${r.pages.length} pág.)</span>`
+                    : `<span class="ps-pill-no"><i class='bx bx-x-circle'></i> no</span>`;
+
+            const previewActions = r.sourceUrl ? `
+                        <div class="ps-result-actions">
+                            <button class="ps-mini-btn secondary" type="button" data-open-index="${index}" title="Abrir el PDF completo">
+                                <i class='bx bx-file'></i> Abrir PDF
+                            </button>
+                            <button class="ps-mini-btn" type="button" data-preview-index="${index}" data-preview-page="${firstPage}" title="Ir a la primera página encontrada">
+                                <i class='bx bx-show'></i> Vista previa pág. ${firstPage}
+                            </button>
+                        </div>
+                    ` : '';
+            
+            return `<tr>
+                <td style="font-weight:500;">${r.label}</td>
+                <td style="text-align:center;">
+                    <div style="display:flex; flex-direction:column; gap:0.8rem; align-items:center;">
+                        ${badge}
+                        ${previewActions}
+                    </div>
+                </td>
+                <td style="text-align:center;font-family:monospace;font-size:1.2rem;font-weight:600;">${r.pages.length}</td>
+                ${cells}
+            </tr>`;
+        }).join('');
+
+        tableBody.querySelectorAll('[data-open-index]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const resultIndex = Number(btn.getAttribute('data-open-index'));
+                const result = allResults[resultIndex];
+                if (!result?.sourceUrl) return;
+                window.open(result.sourceUrl, '_blank', 'noopener,noreferrer');
+            });
+        });
+
+        tableBody.querySelectorAll('[data-preview-index]').forEach(el => {
+            const openHandler = () => openPdfPreview(Number(el.getAttribute('data-preview-index')), Number(el.getAttribute('data-preview-page')));
+            el.addEventListener('click', openHandler);
+            el.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openHandler();
+                }
+            });
+        });
+    }
+}
+
+function hideAll() {
+    const resultsArea = document.getElementById('resultsArea');
+    const errorArea = document.getElementById('errorArea');
+    if (resultsArea) resultsArea.style.display = 'none';
+    if (errorArea) errorArea.style.display = 'none';
+}
+
+function showError(msg) {
+    const errorArea = document.getElementById('errorArea');
+    const errorMsg = document.getElementById('errorMsg');
+    if (errorArea && errorMsg) {
+        errorArea.style.display = 'block';
+        errorMsg.textContent = msg;
+    }
+}
+
+function exportCSV() {
+    if (!allResults || !allResults.length) {
+        showError('No hay resultados para exportar');
+        return;
+    }
+    
+    const rows = [['Planilla', 'Archivo', 'Encontrado', 'Páginas con coincidencia', 'Total ocurrencias', 'Total páginas']];
+    allResults.forEach(r => {
+        rows.push([
+            r.label,
+            r.filename,
+            r.found ? 'Sí' : 'No',
+            r.pages.map(p => `Pág.${p.page}(${p.count})`).join('; '),
+            r.pages.reduce((s, p) => s + p.count, 0),
+            r.totalPages
+        ]);
+    });
+    
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }));
+    a.download = `busqueda_${searchedTerm.replace(/\s+/g, '_')}.csv`;
+    a.click();
+}
+
+async function startSearch() {
+    if (searching) return;
+    
+    const pdfInput = document.getElementById('pdfInput');
+    const searchTermInput = document.getElementById('searchTerm');
+    const caseSensitiveCheck = document.getElementById('caseSensitive');
+    const useOCRCheck = document.getElementById('useOCR');
+    
+    const files = Array.from(pdfInput.files);
+    const term = searchTermInput.value.trim();
+    const caseSensitive = caseSensitiveCheck.checked;
+    const useOCR = useOCRCheck.checked;
+    
+    hideAll();
+    cleanupPreviewUrls();
+    closePdfPreview();
+    
+    if (!files.length) {
+        showError('❌ Selecciona al menos un archivo PDF.');
+        return;
+    }
+    
+    if (!term) {
+        showError('❌ Escribe el nombre o frase a buscar.');
+        return;
+    }
+    
+    searching = true;
+    searchedTerm = term;
+    allResults = [];
+    
+    const btn = document.getElementById('searchBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Procesando...';
+    
+    const fileStates = files.map((f, i) => ({
+        file: f,
+        label: getFileLabel(f.name),
+        status: 'pending',
+        id: i
+    }));
+    
+    renderQueue(fileStates);
+    document.getElementById('queueArea').style.display = 'block';
+    document.getElementById('globalProgress').style.display = 'block';
+    
+    for (let i = 0; i < fileStates.length; i++) {
+        const fs = fileStates[i];
+        fs.status = 'processing';
+        renderQueue(fileStates);
+        
+        try {
+            const result = await processPDF(fs.file, fs.label, term, caseSensitive, useOCR, i, fileStates.length);
+            fs.status = 'done';
+            allResults.push(result);
+        } catch (e) {
+            fs.status = 'error';
+            allResults.push({
+                label: fs.label,
+                filename: fs.file.name,
+                found: false,
+                pages: [],
+                totalPages: 0,
+                error: e.message
+            });
+            console.error(`Error procesando ${fs.label}:`, e);
+        }
+        renderQueue(fileStates);
+    }
+    
+    updateGlobal('✅ Escaneo completado', 100);
+    setTimeout(() => {
+        document.getElementById('globalProgress').style.display = 'none';
+    }, 1500);
+    
+    showResults(term, allResults);
+    searching = false;
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bx bx-search"></i> Iniciar escaneo';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('searchBtn').onclick = startSearch;
+    document.getElementById('exportBtn').onclick = exportCSV;
+    
+    // Scroll suave para el footer
+    document.querySelector('.footer-iconTop a')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+});
+</script>
+</body>
+</html
